@@ -229,6 +229,4 @@ function RiqUI:CreateWindow(name)
     return window
 end
 
-return function()
-    return RiqUI
-end
+return RiqUI
