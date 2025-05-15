@@ -1,18 +1,18 @@
--- UI Framework
-local library = {}
+-- UI Library
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
-local uis = game:GetService("UserInputService")
-local ts = game:GetService("TweenService")
+local Library = {}
 
-local function create(class, props)
-    local obj = Instance.new(class)
-    for k, v in pairs(props) do
-        obj[k] = v
+local function Create(class, props)
+    local inst = Instance.new(class)
+    for i,v in pairs(props) do
+        inst[i] = v
     end
-    return obj
+    return inst
 end
 
-local function makeDraggable(frame)
+local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
 
     frame.InputBegan:Connect(function(input)
@@ -34,194 +34,243 @@ local function makeDraggable(frame)
         end
     end)
 
-    uis.InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
-            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                                       startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
 end
 
-function library:CreateWindow(title)
-    local ScreenGui = create("ScreenGui", {Name = "FuturisticUI", ResetOnSpawn = false, Parent = game.CoreGui})
+function Library:CreateWindow(title)
+    local ScreenGui = Create("ScreenGui", {
+        Name = "FuturisticUI",
+        ResetOnSpawn = false,
+        Parent = game:GetService("CoreGui")
+    })
 
-    local Main = create("Frame", {
-        Size = UDim2.new(0, 450, 0, 350),
-        Position = UDim2.new(0.5, -225, 0.5, -175),
-        BackgroundColor3 = Color3.fromRGB(25, 25, 30),
+    local Main = Create("Frame", {
+        Size = UDim2.new(0, 500, 0, 300),
+        Position = UDim2.new(0.5, -250, 0.5, -150),
+        BackgroundColor3 = Color3.fromRGB(24, 24, 32),
         BorderSizePixel = 0,
         AnchorPoint = Vector2.new(0.5, 0.5),
         Parent = ScreenGui
     })
-    makeDraggable(Main)
 
-    local UICorner = create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = Main})
+    MakeDraggable(Main)
 
-    local Title = create("TextLabel", {
-        Size = UDim2.new(1, 0, 0, 30),
+    local UICorner = Create("UICorner", {CornerRadius = UDim.new(0, 12), Parent = Main})
+    local UIStroke = Create("UIStroke", {
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+        Color = Color3.fromRGB(0, 170, 255),
+        Thickness = 1.5,
+        Parent = Main
+    })
+
+    local Title = Create("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 40),
         BackgroundTransparency = 1,
         Text = title,
-        TextColor3 = Color3.fromRGB(200, 200, 255),
-        Font = Enum.Font.GothamMedium,
-        TextSize = 18,
+        Font = Enum.Font.GothamBold,
+        TextSize = 20,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
         Parent = Main
     })
 
-    local TabFrame = create("Frame", {
-        Size = UDim2.new(1, -20, 1, -40),
-        Position = UDim2.new(0, 10, 0, 35),
+    local Tabs = Create("Frame", {
+        Size = UDim2.new(0, 140, 1, -40),
+        Position = UDim2.new(0, 0, 0, 40),
+        BackgroundColor3 = Color3.fromRGB(18, 18, 24),
+        BorderSizePixel = 0,
+        Parent = Main
+    })
+    Create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = Tabs})
+
+    local Content = Create("Frame", {
+        Size = UDim2.new(1, -140, 1, -40),
+        Position = UDim2.new(0, 140, 0, 40),
         BackgroundTransparency = 1,
         Parent = Main
     })
 
-    local layout = create("UIListLayout", {
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        Padding = UDim.new(0, 5),
-        Parent = TabFrame
-    })
+    local tabButtons = {}
+    local tabPages = {}
 
-    local window = {}
+    local function switchTab(name)
+        for tab, page in pairs(tabPages) do
+            page.Visible = (tab == name)
+        end
+        for btn, _ in pairs(tabButtons) do
+            btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+        end
+        tabButtons[name].BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    end
 
-    function window:CreateTab(name)
-        local tab = {}
-
-        local TabTitle = create("TextLabel", {
+    local function createTab(name)
+        local btn = Create("TextButton", {
+            Size = UDim2.new(1, -10, 0, 35),
+            Position = UDim2.new(0, 5, 0, #tabButtons * 40),
+            BackgroundColor3 = Color3.fromRGB(30, 30, 40),
             Text = name,
-            Size = UDim2.new(1, 0, 0, 20),
-            BackgroundTransparency = 1,
+            Font = Enum.Font.Gotham,
+            TextSize = 14,
             TextColor3 = Color3.fromRGB(255, 255, 255),
-            Font = Enum.Font.GothamBold,
-            TextSize = 16,
-            LayoutOrder = 0,
-            Parent = TabFrame
+            Parent = Tabs
+        })
+        Create("UICorner", {CornerRadius = UDim.new(0, 6), Parent = btn})
+
+        local tabPage = Create("ScrollingFrame", {
+            Size = UDim2.new(1, 0, 1, 0),
+            CanvasSize = UDim2.new(0, 0, 2, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Visible = false,
+            Parent = Content,
+            ScrollBarThickness = 4
         })
 
-        function tab:AddToggle(text, default, callback)
-            local Toggle = create("TextButton", {
-                Text = text,
-                Size = UDim2.new(1, 0, 0, 25),
+        tabButtons[name] = btn
+        tabPages[name] = tabPage
+
+        btn.MouseButton1Click:Connect(function()
+            switchTab(name)
+        end)
+
+        if #tabButtons == 1 then
+            switchTab(name)
+        end
+
+        local Tab = {}
+        local elementY = 0
+
+        function Tab:AddToggle(text, default, callback)
+            local toggle = Create("TextButton", {
+                Size = UDim2.new(1, -20, 0, 30),
+                Position = UDim2.new(0, 10, 0, elementY),
                 BackgroundColor3 = Color3.fromRGB(40, 40, 50),
-                TextColor3 = Color3.fromRGB(200, 200, 200),
+                Text = text .. ": " .. (default and "On" or "Off"),
                 Font = Enum.Font.Gotham,
                 TextSize = 14,
-                LayoutOrder = 1,
-                Parent = TabFrame
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                Parent = tabPage
             })
-            create("UICorner", {CornerRadius = UDim.new(0, 4), Parent = Toggle})
+            Create("UICorner", {CornerRadius = UDim.new(0, 6), Parent = toggle})
             local state = default
-            Toggle.Text = text .. ": " .. (state and "ON" or "OFF")
-            Toggle.MouseButton1Click:Connect(function()
+            toggle.MouseButton1Click:Connect(function()
                 state = not state
-                Toggle.Text = text .. ": " .. (state and "ON" or "OFF")
+                toggle.Text = text .. ": " .. (state and "On" or "Off")
                 callback(state)
             end)
+            elementY += 35
         end
 
-        function tab:AddButton(text, callback)
-            local Button = create("TextButton", {
-                Text = text,
-                Size = UDim2.new(1, 0, 0, 25),
-                BackgroundColor3 = Color3.fromRGB(60, 60, 90),
-                TextColor3 = Color3.fromRGB(255, 255, 255),
-                Font = Enum.Font.Gotham,
-                TextSize = 14,
-                LayoutOrder = 1,
-                Parent = TabFrame
-            })
-            create("UICorner", {CornerRadius = UDim.new(0, 4), Parent = Button})
-            Button.MouseButton1Click:Connect(callback)
-        end
-
-        function tab:AddSlider(text, config, callback)
-            local value = config.default or config.min
-
-            local Frame = create("Frame", {
-                Size = UDim2.new(1, 0, 0, 35),
+        function Tab:AddSlider(text, config, callback)
+            local label = Create("TextLabel", {
+                Size = UDim2.new(1, -20, 0, 20),
+                Position = UDim2.new(0, 10, 0, elementY),
                 BackgroundTransparency = 1,
-                LayoutOrder = 1,
-                Parent = TabFrame
-            })
-
-            local Label = create("TextLabel", {
-                Text = text .. ": " .. tostring(value),
-                Size = UDim2.new(1, 0, 0, 15),
-                BackgroundTransparency = 1,
-                TextColor3 = Color3.fromRGB(220, 220, 220),
+                Text = text .. ": " .. config.default,
                 Font = Enum.Font.Gotham,
                 TextSize = 13,
-                Parent = Frame
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                Parent = tabPage
             })
 
-            local Slider = create("TextButton", {
-                Text = "",
-                Size = UDim2.new(1, 0, 0, 15),
-                Position = UDim2.new(0, 0, 0, 18),
-                BackgroundColor3 = Color3.fromRGB(100, 100, 120),
-                Parent = Frame
+            local sliderBack = Create("Frame", {
+                Size = UDim2.new(1, -20, 0, 6),
+                Position = UDim2.new(0, 10, 0, elementY + 22),
+                BackgroundColor3 = Color3.fromRGB(50, 50, 60),
+                BorderSizePixel = 0,
+                Parent = tabPage
             })
-            create("UICorner", {Parent = Slider})
+            Create("UICorner", {CornerRadius = UDim.new(0, 3), Parent = sliderBack})
 
-            local DragBar = create("Frame", {
-                Size = UDim2.new((value-config.min)/(config.max-config.min), 0, 1, 0),
-                BackgroundColor3 = Color3.fromRGB(0, 200, 255),
-                Parent = Slider
+            local fill = Create("Frame", {
+                Size = UDim2.new((config.default-config.min)/(config.max-config.min), 0, 1, 0),
+                BackgroundColor3 = Color3.fromRGB(0, 170, 255),
+                BorderSizePixel = 0,
+                Parent = sliderBack
             })
-            create("UICorner", {Parent = DragBar})
+            Create("UICorner", {CornerRadius = UDim.new(0, 3), Parent = fill})
 
-            Slider.MouseButton1Down:Connect(function()
-                local conn
-                conn = uis.InputChanged:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseMovement then
-                        local rel = math.clamp((input.Position.X - Slider.AbsolutePosition.X) / Slider.AbsoluteSize.X, 0, 1)
-                        DragBar.Size = UDim2.new(rel, 0, 1, 0)
-                        local newVal = math.floor((config.min + (config.max - config.min) * rel) + 0.5)
-                        Label.Text = text .. ": " .. newVal
-                        callback(newVal)
-                    end
-                end)
-                uis.InputEnded:Wait()
-                if conn then conn:Disconnect() end
+            local dragging = false
+
+            sliderBack.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
             end)
+
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+            end)
+
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    local rel = math.clamp((input.Position.X - sliderBack.AbsolutePosition.X) / sliderBack.AbsoluteSize.X, 0, 1)
+                    fill.Size = UDim2.new(rel, 0, 1, 0)
+                    local val = math.floor(config.min + (config.max - config.min) * rel)
+                    label.Text = text .. ": " .. val
+                    callback(val)
+                end
+            end)
+            elementY += 50
         end
 
-        function tab:AddKeybind(text, default, callback)
-            local Button = create("TextButton", {
-                Text = text .. ": [" .. default.Name .. "]",
-                Size = UDim2.new(1, 0, 0, 25),
-                BackgroundColor3 = Color3.fromRGB(40, 40, 70),
+        function Tab:AddButton(text, callback)
+            local btn = Create("TextButton", {
+                Size = UDim2.new(1, -20, 0, 30),
+                Position = UDim2.new(0, 10, 0, elementY),
+                BackgroundColor3 = Color3.fromRGB(40, 40, 50),
+                Text = text,
+                Font = Enum.Font.GothamBold,
+                TextSize = 14,
                 TextColor3 = Color3.fromRGB(255, 255, 255),
+                Parent = tabPage
+            })
+            Create("UICorner", {CornerRadius = UDim.new(0, 6), Parent = btn})
+            btn.MouseButton1Click:Connect(callback)
+            elementY += 35
+        end
+
+        function Tab:AddKeybind(text, keycode, callback)
+            local bind = keycode
+            local label = Create("TextButton", {
+                Size = UDim2.new(1, -20, 0, 30),
+                Position = UDim2.new(0, 10, 0, elementY),
+                BackgroundColor3 = Color3.fromRGB(40, 40, 50),
+                Text = text .. ": " .. keycode.Name,
                 Font = Enum.Font.Gotham,
                 TextSize = 14,
-                LayoutOrder = 1,
-                Parent = TabFrame
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                Parent = tabPage
             })
-            create("UICorner", {Parent = Button})
+            Create("UICorner", {CornerRadius = UDim.new(0, 6), Parent = label})
 
-            local key = default
-
-            Button.MouseButton1Click:Connect(function()
-                Button.Text = text .. ": [Press a key]"
+            label.MouseButton1Click:Connect(function()
+                label.Text = text .. ": [Press]"
                 local conn
-                conn = uis.InputBegan:Connect(function(input)
+                conn = UserInputService.InputBegan:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.Keyboard then
-                        key = input.KeyCode
-                        Button.Text = text .. ": [" .. key.Name .. "]"
+                        bind = input.KeyCode
+                        label.Text = text .. ": " .. bind.Name
                         conn:Disconnect()
                     end
                 end)
             end)
 
-            uis.InputBegan:Connect(function(input)
-                if input.KeyCode == key then
+            UserInputService.InputBegan:Connect(function(input)
+                if input.KeyCode == bind then
                     callback()
                 end
             end)
+            elementY += 35
         end
 
-        return tab
+        return Tab
     end
 
-    return window
+    return {CreateTab = createTab}
 end
 
-return library
+return Library
