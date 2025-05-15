@@ -1,229 +1,269 @@
--- RiqUI Library
+-- RiqUI - Versão simples para loadstring
 local RiqUI = {}
 
-local function CreateInstance(class, props)
-    local instance = Instance.new(class)
-    for prop, value in pairs(props) do
-        instance[prop] = value
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local function create(class, props)
+    local obj = Instance.new(class)
+    if props then
+        for k,v in pairs(props) do
+            if k == "Parent" then
+                obj.Parent = v
+            else
+                obj[k] = v
+            end
+        end
     end
-    return instance
+    return obj
 end
 
-function RiqUI:CreateWindow(name)
-    local ScreenGui = CreateInstance("ScreenGui", {
+function RiqUI:CreateWindow(title)
+    local selfWindow = {}
+
+    local screenGui = create("ScreenGui", {
+        Name = "RiqUI",
         ResetOnSpawn = false,
-        ZIndexBehavior = "Global",
-        Parent = game:GetService("CoreGui") -- Parenteamento ESSENCIAL
+        Parent = game:GetService("CoreGui"),
     })
 
-    local MainFrame = CreateInstance("Frame", {
-        Size = UDim2.new(0, 350, 0, 400),
-        Position = UDim2.new(0.5, -175, 0.5, -200),
-        BackgroundColor3 = Color3.fromRGB(25, 25, 25),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        Parent = ScreenGui
+    local mainFrame = create("Frame", {
+        Parent = screenGui,
+        Size = UDim2.new(0, 400, 0, 300),
+        Position = UDim2.new(0.5, -200, 0.5, -150),
+        BackgroundColor3 = Color3.fromRGB(30, 30, 40),
+        BorderSizePixel = 0,
+        ClipsDescendants = true,
     })
 
-    CreateInstance("UICorner", {CornerRadius = UDim.new(0, 8), Parent = MainFrame})
-    
-    -- Tabs container
-    local TabButtons = CreateInstance("Frame", {
+    local titleLabel = create("TextLabel", {
+        Parent = mainFrame,
+        Size = UDim2.new(1, 0, 0, 40),
+        BackgroundColor3 = Color3.fromRGB(25, 25, 35),
+        TextColor3 = Color3.fromRGB(230, 230, 230),
+        Font = Enum.Font.GothamBold,
+        TextSize = 20,
+        Text = title,
+        BorderSizePixel = 0,
+    })
+
+    local tabButtonsFrame = create("Frame", {
+        Parent = mainFrame,
         Size = UDim2.new(1, 0, 0, 30),
-        BackgroundTransparency = 1,
-        Parent = MainFrame
+        Position = UDim2.new(0, 0, 0, 40),
+        BackgroundColor3 = Color3.fromRGB(20, 20, 30),
+        BorderSizePixel = 0,
     })
 
-    local TabListLayout = CreateInstance("UIListLayout", {
-        FillDirection = Enum.FillDirection.Horizontal,
-        Parent = TabButtons
+    local tabContentFrame = create("Frame", {
+        Parent = mainFrame,
+        Size = UDim2.new(1, 0, 1, -70),
+        Position = UDim2.new(0, 0, 0, 70),
+        BackgroundColor3 = Color3.fromRGB(18, 18, 25),
+        BorderSizePixel = 0,
+        ClipsDescendants = true,
     })
 
-    local ContentFrame = CreateInstance("Frame", {
-        Size = UDim2.new(1, -10, 1, -40),
-        Position = UDim2.new(0, 5, 0, 35),
-        BackgroundTransparency = 1,
-        Parent = MainFrame
-    })
+    local tabs = {}
+    local activeTab = nil
 
-    local ContentLayout = CreateInstance("UIListLayout", {
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        Padding = UDim.new(0, 5),
-        Parent = ContentFrame
-    })
+    local function clearTabContent()
+        for _, child in ipairs(tabContentFrame:GetChildren()) do
+            if child:IsA("Frame") then
+                child.Visible = false
+            end
+        end
+    end
 
-    local window = {
-        Tabs = {},
-        CurrentTab = nil
-    }
-
-    function window:CreateTab(name)
-        local tab = {
-            Name = name,
-            Elements = {}
-        }
-
-        -- Tab button
-        local TabButton = CreateInstance("TextButton", {
-            Size = UDim2.new(0, 70, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+    function selfWindow:CreateTab(name)
+        local tabButton = create("TextButton", {
+            Parent = tabButtonsFrame,
+            Size = UDim2.new(0, 100, 1, 0),
+            BackgroundColor3 = Color3.fromRGB(40, 40, 50),
+            BorderSizePixel = 0,
             Text = name,
-            TextColor3 = Color3.fromRGB(255, 255, 255),
-            Parent = TabButtons
+            Font = Enum.Font.Gotham,
+            TextSize = 16,
+            TextColor3 = Color3.fromRGB(180, 180, 180),
         })
 
-        CreateInstance("UICorner", {CornerRadius = UDim.new(0, 4), Parent = TabButton})
-
-        -- Tab content
-        local TabContent = CreateInstance("ScrollingFrame", {
+        local tabPage = create("Frame", {
+            Parent = tabContentFrame,
             Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1,
             Visible = false,
-            ScrollBarThickness = 3,
-            Parent = ContentFrame
         })
 
-        CreateInstance("UIListLayout", {
+        local layout = create("UIListLayout", {
+            Parent = tabPage,
+            Padding = UDim.new(0, 10),
             SortOrder = Enum.SortOrder.LayoutOrder,
-            Padding = UDim.new(0, 5),
-            Parent = TabContent
         })
 
-        function tab:Show()
-            if window.CurrentTab then
-                window.CurrentTab.Content.Visible = false
-                window.CurrentTab.Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        local padding = create("UIPadding", {
+            Parent = tabPage,
+            PaddingTop = UDim.new(0, 10),
+            PaddingLeft = UDim.new(0, 10),
+            PaddingRight = UDim.new(0, 10),
+        })
+
+        tabButton.MouseButton1Click:Connect(function()
+            for _, btn in ipairs(tabButtonsFrame:GetChildren()) do
+                if btn:IsA("TextButton") then
+                    btn.BackgroundColor3 = Color3.fromRGB(40,40,50)
+                    btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+                end
             end
-            TabContent.Visible = true
-            TabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-            window.CurrentTab = tab
+            tabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+            tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+            clearTabContent()
+            tabPage.Visible = true
+            activeTab = tabPage
+        end)
+
+        if #tabs == 0 then
+            tabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+            tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            tabPage.Visible = true
+            activeTab = tabPage
         end
 
-        function tab:AddToggle(text, default, callback)
-            local ToggleFrame = CreateInstance("Frame", {
+        local tab = {}
+
+        function tab:AddToggle(name, default, callback)
+            local container = create("Frame", {
+                Parent = tabPage,
                 Size = UDim2.new(1, 0, 0, 30),
-                BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-                Parent = TabContent
-            })
-
-            CreateInstance("UICorner", {CornerRadius = UDim.new(0, 4), Parent = ToggleFrame})
-
-            local ToggleButton = CreateInstance("TextButton", {
-                Size = UDim2.new(1, 0, 1, 0),
                 BackgroundTransparency = 1,
-                Text = "",
-                Parent = ToggleFrame
+                LayoutOrder = #tabPage:GetChildren(),
             })
 
-            local ToggleLabel = CreateInstance("TextLabel", {
+            local label = create("TextLabel", {
+                Parent = container,
                 Size = UDim2.new(0.7, 0, 1, 0),
-                Text = text,
-                TextColor3 = Color3.fromRGB(255, 255, 255),
                 BackgroundTransparency = 1,
+                Text = name,
+                TextColor3 = Color3.fromRGB(220, 220, 220),
+                Font = Enum.Font.Gotham,
+                TextSize = 16,
                 TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = ToggleFrame
             })
 
-            local ToggleState = CreateInstance("Frame", {
-                Size = UDim2.new(0, 20, 0, 20),
-                Position = UDim2.new(1, -25, 0.5, -10),
-                BackgroundColor3 = Color3.fromRGB(80, 80, 80),
-                Parent = ToggleFrame
+            local toggleBtn = create("TextButton", {
+                Parent = container,
+                Size = UDim2.new(0, 50, 0, 20),
+                Position = UDim2.new(0.75, 0, 0.15, 0),
+                BackgroundColor3 = default and Color3.fromRGB(100, 180, 100) or Color3.fromRGB(150, 150, 150),
+                BorderSizePixel = 0,
+                Text = default and "ON" or "OFF",
+                Font = Enum.Font.GothamBold,
+                TextSize = 14,
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                AutoButtonColor = false,
+                ClipsDescendants = true,
             })
 
-            CreateInstance("UICorner", {CornerRadius = UDim.new(1, 0), Parent = ToggleState})
-
-            local state = default
-            local function UpdateToggle()
-                ToggleState.BackgroundColor3 = state and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(80, 80, 80)
-                callback(state)
+            local toggled = default
+            local function updateToggle()
+                if toggled then
+                    toggleBtn.BackgroundColor3 = Color3.fromRGB(100, 180, 100)
+                    toggleBtn.Text = "ON"
+                else
+                    toggleBtn.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+                    toggleBtn.Text = "OFF"
+                end
+                callback(toggled)
             end
 
-            ToggleButton.MouseButton1Click:Connect(function()
-                state = not state
-                UpdateToggle()
+            toggleBtn.MouseButton1Click:Connect(function()
+                toggled = not toggled
+                updateToggle()
             end)
 
-            UpdateToggle()
+            updateToggle()
+
+            return container
         end
 
-        function tab:AddSlider(text, options, callback)
-            local SliderFrame = CreateInstance("Frame", {
+        function tab:AddSlider(name, opts, callback)
+            local container = create("Frame", {
+                Parent = tabPage,
                 Size = UDim2.new(1, 0, 0, 50),
-                BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-                Parent = TabContent
-            })
-
-            CreateInstance("UICorner", {CornerRadius = UDim.new(0, 4), Parent = SliderFrame})
-
-            local SliderLabel = CreateInstance("TextLabel", {
-                Size = UDim2.new(1, -10, 0, 20),
-                Position = UDim2.new(0, 5, 0, 5),
-                Text = text,
-                TextColor3 = Color3.fromRGB(200, 200, 200),
                 BackgroundTransparency = 1,
+                LayoutOrder = #tabPage:GetChildren(),
+            })
+
+            local label = create("TextLabel", {
+                Parent = container,
+                Size = UDim2.new(1, 0, 0, 20),
+                BackgroundTransparency = 1,
+                Text = name .. ": " .. tostring(opts.default),
+                TextColor3 = Color3.fromRGB(220, 220, 220),
+                Font = Enum.Font.Gotham,
+                TextSize = 16,
                 TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = SliderFrame
             })
 
-            local Track = CreateInstance("Frame", {
-                Size = UDim2.new(1, -10, 0, 5),
-                Position = UDim2.new(0, 5, 1, -15),
-                BackgroundColor3 = Color3.fromRGB(80, 80, 80),
-                Parent = SliderFrame
+            local sliderFrame = create("Frame", {
+                Parent = container,
+                Size = UDim2.new(1, 0, 0, 20),
+                Position = UDim2.new(0, 0, 0, 25),
+                BackgroundColor3 = Color3.fromRGB(40, 40, 50),
+                BorderSizePixel = 0,
+                ClipsDescendants = true,
             })
 
-            CreateInstance("UICorner", {CornerRadius = UDim.new(1, 0), Parent = Track})
-
-            local Fill = CreateInstance("Frame", {
-                Size = UDim2.new(0, 0, 1, 0),
-                BackgroundColor3 = Color3.fromRGB(0, 170, 255),
-                Parent = Track
+            local sliderBar = create("Frame", {
+                Parent = sliderFrame,
+                Size = UDim2.new((opts.default - opts.min) / (opts.max - opts.min), 0, 1, 0),
+                BackgroundColor3 = Color3.fromRGB(100, 180, 250),
+                BorderSizePixel = 0,
             })
-
-            CreateInstance("UICorner", {CornerRadius = UDim.new(1, 0), Parent = Fill})
 
             local dragging = false
-            local currentValue = options.default or options.min
 
-            local function UpdateSlider(value)
-                local percent = (value - options.min) / (options.max - options.min)
-                Fill.Size = UDim2.new(percent, 0, 1, 0)
-                SliderLabel.Text = text..": "..tostring(math.floor(value))
-                currentValue = value
+            local function updateValue(inputPosX)
+                local relativeX = math.clamp(inputPosX - sliderFrame.AbsolutePosition.X, 0, sliderFrame.AbsoluteSize.X)
+                local value = (relativeX / sliderFrame.AbsoluteSize.X) * (opts.max - opts.min) + opts.min
+                value = math.floor(value)
+                sliderBar.Size = UDim2.new(relativeX / sliderFrame.AbsoluteSize.X, 0, 1, 0)
+                label.Text = name .. ": " .. tostring(value)
                 callback(value)
             end
 
-            Track.InputBegan:Connect(function(input)
+            sliderFrame.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     dragging = true
-                    local pos = input.Position.X - Track.AbsolutePosition.X
-                    local value = options.min + (pos / Track.AbsoluteSize.X) * (options.max - options.min)
-                    value = math.clamp(math.floor(value), options.min, options.max)
-                    UpdateSlider(value)
+                    updateValue(input.Position.X)
                 end
             end)
 
-            game:GetService("UserInputService").InputEnded:Connect(function(input)
+            sliderFrame.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     dragging = false
                 end
             end)
 
-            UpdateSlider(options.default)
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    updateValue(input.Position.X)
+                end
+            end)
+
+            return container
         end
 
-        tab.Content = TabContent
-        tab.Button = TabButton
-        table.insert(window.Tabs, tab)
-
-        if #window.Tabs == 1 then
-            tab:Show()
-        end
+        table.insert(tabs, tab)
 
         return tab
     end
 
-    return window
+    function selfWindow:Destroy()
+        screenGui:Destroy()
+    end
+
+    return selfWindow
 end
 
 return RiqUI
