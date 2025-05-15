@@ -1,9 +1,3 @@
---[[
-    Advanced Cheat UI Framework (Rayfield/Fluent Style)
-    Author: ChatGPT
-    Description: Modular cheat-style UI with toggle and slider support.
---]]
-
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 
