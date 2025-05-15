@@ -4,11 +4,7 @@ local RiqUI = {}
 local function CreateInstance(class, props)
     local instance = Instance.new(class)
     for prop, value in pairs(props) do
-        if prop == "Parent" then
-            instance.Parent = value
-        else
-            instance[prop] = value
-        end
+        instance[prop] = value
     end
     return instance
 end
@@ -16,7 +12,8 @@ end
 function RiqUI:CreateWindow(name)
     local ScreenGui = CreateInstance("ScreenGui", {
         ResetOnSpawn = false,
-        ZIndexBehavior = "Global"
+        ZIndexBehavior = "Global",
+        Parent = game:GetService("CoreGui")
     })
 
     local MainFrame = CreateInstance("Frame", {
