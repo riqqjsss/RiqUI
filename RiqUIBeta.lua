@@ -13,18 +13,18 @@ function RiqUI:CreateWindow(name)
     local ScreenGui = CreateInstance("ScreenGui", {
         ResetOnSpawn = false,
         ZIndexBehavior = "Global",
-        Parent = game:GetService("CoreGui")
+        Parent = game:GetService("CoreGui") -- Parenteamento ESSENCIAL
     })
 
     local MainFrame = CreateInstance("Frame", {
         Size = UDim2.new(0, 350, 0, 400),
         Position = UDim2.new(0.5, -175, 0.5, -200),
-        BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+        BackgroundColor3 = Color3.fromRGB(25, 25, 25),
         AnchorPoint = Vector2.new(0.5, 0.5),
         Parent = ScreenGui
     })
 
-    CreateInstance("UICorner", {CornerRadius = UDim.new(0, 6), Parent = MainFrame})
+    CreateInstance("UICorner", {CornerRadius = UDim.new(0, 8), Parent = MainFrame})
     
     -- Tabs container
     local TabButtons = CreateInstance("Frame", {
