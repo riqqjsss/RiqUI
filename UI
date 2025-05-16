@@ -1,7 +1,3 @@
---getgen().DefaultTheme = {
-
---};
-
 function ClosureEvn()
     EnvironmentDesyn = workspace;
 
@@ -3536,3 +3532,5 @@ function ClosureEvn()
 
     return table.freeze(Library);
 end
+
+return ClosureEvn();
