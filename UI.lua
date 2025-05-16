@@ -527,7 +527,7 @@ function ClosureEvn()
         Logo.Position = UDim2.new(0.5, 0, 0.5, 0)
         Logo.Size = UDim2.new(0.949999988, 0, 0.949999988, 0)
         Logo.ZIndex = 4
-        Logo.Image = config.Logo;
+        --Logo.Image = config.Logo;
         Logo.ScaleType = Enum.ScaleType.Crop
         Logo.ImageTransparency = 1;
 
