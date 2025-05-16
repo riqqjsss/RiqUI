@@ -5,7 +5,7 @@ function ClosureEvn()
     local Input = game:GetService('UserInputService');
     local TextServ = game:GetService('TextService');
     local LocalPlayer = game:GetService('Players').LocalPlayer;
-    local CoreGui = (gethui and gethui()) or game:FindFirstChild('CoreGui') or LocalPlayer.PlayerGui;
+    local CoreGui = game:FindFirstChild('CoreGui')
     local Icons = {}
 
     local ElBlurSource = function()
