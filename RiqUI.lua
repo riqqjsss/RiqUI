@@ -216,13 +216,6 @@ function ClosureEvn()
 
     local Library = {};
 
-    Library['.'] = '1';
-    Library['FetchIcon'] = {};
-
-    pcal(function()
-        Library['Icons'] = HttpService:JSONDecode(game:HttpGetAsync(Library.FetchIcon))['icons'];
-    end)
-
     function Library.GradientImage(E : Frame , Color)
         local GLImage = Instance.new("ImageLabel")
         local upd = tick();
