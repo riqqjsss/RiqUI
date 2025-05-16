@@ -275,7 +275,7 @@ function ClosureEvn()
             Title = "UI Library",
             Description = "By Neuron X",
             Keybind = Enum.KeyCode.LeftControl,
-            Logo = "http://www.roblox.com/asset/?id=80055499055359",
+            Logo = nil,
             Size = UDim2.new(0.100000001, 445, 0.100000001, 315),
             IsRich = false,
             RichText = '<font color="#0000FF">NeuronX</font> <font color="#FFFFFF">On Top</font>',
@@ -527,7 +527,7 @@ function ClosureEvn()
         Logo.Position = UDim2.new(0.5, 0, 0.5, 0)
         Logo.Size = UDim2.new(0.949999988, 0, 0.949999988, 0)
         Logo.ZIndex = 4
-        --Logo.Image = config.Logo;
+        Logo.Image = config.Logo;
         Logo.ScaleType = Enum.ScaleType.Crop
         Logo.ImageTransparency = 1;
 
