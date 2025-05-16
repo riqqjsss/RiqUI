@@ -3530,8 +3530,7 @@ function ClosureEvn()
     print('[ OK ]: Fetch Nothing Library')
     print('[ UI ]: All credits to sofia_z5z aka ttjy, i just restored it')
 
-    return table.freeze(Library);
+    return Library
 end
 
-local UI = ClosureEvn();
-return UI
+local ClosureEvn();
