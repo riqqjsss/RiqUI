@@ -3533,4 +3533,4 @@ function ClosureEvn()
     return Library
 end
 
-local ClosureEvn();
+return ClosureEvn();
