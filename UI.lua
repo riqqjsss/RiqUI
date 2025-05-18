@@ -1968,8 +1968,18 @@ function ClosureEvn()
                             Size = UDim2.new(0, size.X + 2, 0.600000024, 0)
                         }):Play()
                     end;
+                    local currentKey = ctfx.Default
 
-                    UpdateUI(ctfx.Default)
+                    local function UpdateUI(text)
+                        TextInt.Text = text.Name
+                    end
+
+                    local function setKey(newKey)
+                        currentKey = newKey
+                        UpdateUI(newKey)
+                    end
+
+                    UpdateUI(currentKey)
 
                     Button.MouseButton1Click:Connect(function()
                         if IsWIP then return end;
@@ -1995,12 +2005,16 @@ function ClosureEvn()
                             TextTransparency = 0.250
                         }):Play();
                         Signal:Disconnect()
-                        UpdateUI(Bind)
+                        setKey(Bind)
 
                         IsWIP = false;
                         ctfx.Callback(Bind);
-
-
+                    end)
+                    
+                    Input.InputBegan:Connect(function(input, gameProcessed)
+                        if not gameProcessed and input.KeyCode == currentKey then
+                            ctfx.Callback(currentKey)
+                        end
                     end)
 
                     return {
