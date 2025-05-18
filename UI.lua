@@ -41,7 +41,7 @@ function ClosureEvn()
 
             Part.Material = Enum.Material.Glass;
             Part.Transparency = 1;
-            Part.Reflectance = 1;
+            Part.Reflectance = 0;
             Part.CastShadow = false;
             Part.Anchored = true;
             Part.CanCollide = false;
@@ -132,11 +132,11 @@ function ClosureEvn()
 
                         if qualityLevel < 8 then
                             Twen:Create(frame,TweenInfo.new(1),{
-                                BackgroundTransparency = 0
+                                BackgroundTransparency = 0.4
                             }):Play()
                         else
                             Twen:Create(frame,TweenInfo.new(1),{
-                                BackgroundTransparency = 0.4
+                                BackgroundTransparency = 0.8
                             }):Play()
                         end;
                     end)
