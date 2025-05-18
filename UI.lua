@@ -39,7 +39,7 @@ function ClosureEvn()
 
             BlockMesh.Parent = Part;
 
-            Part.Material = Enum.Material.Glass;
+            Part.Material = Enum.Material.SmoothPlastic;
             Part.Transparency = 1;
             Part.Reflectance = 0;
             Part.CastShadow = false;
