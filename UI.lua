@@ -1970,10 +1970,6 @@ function ClosureEvn()
                     end;
                     local currentKey = ctfx.Default
 
-                    local function UpdateUI(text)
-                        TextInt.Text = text.Name
-                    end
-
                     local function setKey(newKey)
                         currentKey = newKey
                         UpdateUI(newKey)
