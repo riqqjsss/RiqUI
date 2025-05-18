@@ -286,7 +286,8 @@ function ClosureEvn()
                 NumberSequenceKeypoint.new(1.00, 1.00)
             },
             BlockTransparency2 = 0.9,
-            WindowStroke = true
+            WindowStroke = true,
+            WindowStrokeColor = Color3.fromRGB(255, 255, 255)
         });
 
         local TweenInfo1 = TweenInfo.new(1,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut);
@@ -475,7 +476,7 @@ function ClosureEvn()
 
         if config.WindowStroke then
             uiStrokeClonRefer = Instance.new("UIStroke");
-            uiStrokeClonRefer.Color = Color3.fromRGB(0, 0, 255);
+            uiStrokeClonRefer.Color = config.WindowStrokeColor or Color3.fromRGB(255, 255, 255);
             uiStrokeClonRefer.Thickness = 2;
             uiStrokeClonRefer.Parent = MainFrame;
         end;
